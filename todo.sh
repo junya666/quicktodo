@@ -75,9 +75,9 @@ COMMENT
 List() {
   #TODO -a|-dがなければDone_atカラムは表示しない
   (
-    echo ID,Label,TODO,Created_at,Done_at
+    echo ID,Label,TODO,Created_at
     while read line; do
-      echo $line
+      echo $line | awk -F, -v OFS="," '{if($5=="-")print $1,$2,$3,$4}'
     done < $TODO_FILE
   ) | column -t -s ,
 }
