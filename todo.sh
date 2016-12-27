@@ -57,7 +57,7 @@ Add() {
   args=("${args[@]}")
   todo=${args[0]}
 
-  if [ "$todo" = "" -o "$label" = "" ]; then
+  if [[ "$todo" = "" || "$label" = "" || $todo == *","* || $label == *","* ]]; then
     Usage add
   fi
 
