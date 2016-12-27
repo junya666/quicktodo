@@ -4,12 +4,17 @@ TODO_FILE="$SELFDIR/.todo_list"
 if [ ! -f $TODO_FILE ]; then
   touch $TODO_FILE
 fi
+BAK_FILE="$SELFDIR/.todo_list.bak"
+if [ ! -f $BAK_FILE ]; then
+  touch $BAK_FILE
+fi
 
 
 Usage() {
   case $1 in
     add) echo add_usage: ... ;;
     _done) echo done_usage: ... ;;
+    remove) echo remove_usage: ... ;;
     *)
       echo "usage: todo [ add | list | done | remove | change ] ..." ;;
   esac
@@ -91,27 +96,46 @@ Done() {
   if [ $RET -ge 2 ]; then
     Usage _done
   else
-    del_id=$1
+    done_id=$1
   fi
 
-  line_num=1
   done_at=`date '+%y/%m/%d(%a)'`
+  cp $TODO_FILE $BAK_FILE
   (
   while read line; do
     new_line=`echo $line |
-      awk -F, -v i="$del_id" -v d="$done_at" -v OFS="," \
-      '{ if($1 == i){ $5 = d; print $0} else print $0 }' `
+      awk -F, -v id="$done_id" -v d="$done_at" -v OFS="," \
+      '{ if($1==id){ $5 = d; print $0} else print $0 }' `
     echo $new_line
-    line_num=$(($line_num+1))
-  done < $TODO_FILE
-  ) > "${TODO_FILE}x"
-  mv "${TODO_FILE}x" $TODO_FILE
+  done < $BAK_FILE
+  ) > $TODO_FILE
 }
 
 
 # 指定したtodoを削除
 Remove() {
-  echo remove
+  # 引数が整数か判定
+  expr $1 + 1 > /dev/null 2>&1
+  RET=$?
+  if [ $RET -ge 2 ]; then
+    Usage remove
+  else
+    remove_id=$1
+  fi
+
+  cp $TODO_FILE $BAK_FILE
+  (
+  while read line; do
+    new_line=`echo $line |
+      awk -F, -v id="$remove_id" -v OFS="," '{
+        if($1!=id) print $0
+      }' `
+    if [ "$new_line" != "" ]; then
+      echo $new_line
+    fi
+  done < $BAK_FILE
+  ) > $TODO_FILE
+ 
 }
 
 
