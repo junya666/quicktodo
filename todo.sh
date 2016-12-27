@@ -25,10 +25,10 @@ Usage() {
 # todo の追加
 # -l ... ラベルの設定
 Add() {
-  if [ $# -eq 0 ]; then
+  if [ $# -lt 2 ]; then
     Usage add
   fi
-  args=($@)
+  args=("$@")
   label="none"
   todo="-"
   created_at=`date '+%y/%m/%d(%a)'`
@@ -43,7 +43,7 @@ Add() {
   fi
 
   # labelオプションの確認
-  for i in `seq 0 1`; do
+  for i in `seq 2`; do
     if [ "${args[$i]}" = "-l" ]; then
       unset args[$i]
       i=$(($i+1))
@@ -55,7 +55,7 @@ Add() {
 
   # todo取り出し
   args=("${args[@]}")
-  todo=${args[0]}
+  todo=${args[1]}
 
   if [[ "$todo" = "" || "$label" = "" || $todo == *","* || $label == *","* ]]; then
     Usage add
@@ -148,7 +148,7 @@ Change() {
 
 
 case $1 in
-  add|a) Add ${@:2:3};;
+  add|a) Add "$@";;
   list|l) List ${@:2};;
   "done"|d) Done ${@:2:1};;
   remove|r) Remove ${@:2:1};;
